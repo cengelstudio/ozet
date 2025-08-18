@@ -4,10 +4,12 @@ import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline'
 import { OAUTH_ERROR_MESSAGES } from '@/config/oauth'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { login } = useAuth()
   const [loading, setLoading] = useState(false)
 
   // OAuth error mesajlarını kontrol et
@@ -21,7 +23,7 @@ export default function LoginForm() {
 
   const handleOAuthLogin = () => {
     setLoading(true)
-    window.location.href = '/api/oauth?action=authorize'
+    login()
   }
 
   return (

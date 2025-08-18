@@ -21,13 +21,27 @@ model User {
   role           String   @default("USER")
   birthDate      DateTime?
   avatarUrl      String?  // Gravatar URL
-  
+
   // OAuth bilgileri
   oauthProvider String?  // cengel_studio, google, github, etc.
   oauthId       String?  // OAuth provider'dan gelen unique ID
   username      String?  @unique // Kullanıcı adı (OAuth'dan gelebilir) - unique
   emailVerified Boolean  @default(false) // Email doğrulandı mı
   lastOAuthSync DateTime? // Son OAuth senkronizasyon zamanı
+
+  // OAuth.MD'ye göre eklenen alanlar
+  displayName   String?  // Görünen ad
+  about         String?  // Kullanıcı hakkında bilgi
+  location      String?  // Konum bilgisi
+  website       String?  // Website adresi
+  phone         String?  // Telefon numarası
+  language      String?  @default("tr") // Kullanıcı dil tercihi
+
+  // OAuth token'ları
+  accessToken   String?  // Access token (şifrelenmiş)
+  refreshToken  String?  // Refresh token (şifrelenmiş)
+  idToken       String?  // ID token (şifrelenmiş)
+  tokenExpiresAt DateTime? // Token'ın geçerlilik süresi
 
   tokens   Token[]
   sessions Session[]
@@ -37,7 +51,7 @@ model User {
   saves    Save[]
   comments Comment[]
   follows  Follow[] // Kullanıcının takip ettiği platformlar
-  
+
   @@index([oauthProvider, oauthId])
 }
 

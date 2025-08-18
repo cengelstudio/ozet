@@ -8,15 +8,14 @@ import { Disclosure, Transition, Menu } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
 import { UserCircleIcon } from '@heroicons/react/24/solid'
 import InfoStrip from './InfoStrip'
-import { sessionUtils } from '@/utils/session'
-import { User } from '@/types/user'
+import { useAuth } from '@/hooks/useAuth'
 
 const navigation = [
-  { name: 'Ana Sayfa', href: '/' },
-  { name: 'Son Dakika', href: '/son-dakika' },
-  { name: '#Deprem', href: '/deprem-haberleri' },
-  { name: '#Yangın', href: '/yangin-haberleri' },
-  { name: 'Platformlar', href: '/platformlar' },
+  { name: 'Ana Sayfa', href: '/' as const },
+  { name: 'Son Dakika', href: '/son-dakika' as const },
+  { name: '#Deprem', href: '/deprem-haberleri' as const },
+  { name: '#Yangın', href: '/yangin-haberleri' as const },
+  { name: 'Platformlar', href: '/platformlar' as const },
 ]
 
 function classNames(...classes: string[]) {
@@ -26,46 +25,8 @@ function classNames(...classes: string[]) {
 export default function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { user, isAuthenticated, loading, logout } = useAuth()
   const pathname = usePathname()
-
-  // Check user session on component mount
-  useEffect(() => {
-    console.log('Header: Checking user session...')
-    const currentUser = sessionUtils.getCurrentUser()
-    console.log('Header: Current user:', currentUser)
-
-    // OAuth kullanıcısı ise session'ın geçerliliğini kontrol et
-    if (currentUser && currentUser.oauthProvider === 'cengel_studio') {
-      console.log('Header: OAuth user detected, verifying session...')
-
-      // Session'ın geçerliliğini kontrol et
-      const session = sessionUtils.getSession()
-      if (session && session.expiresAt && new Date(session.expiresAt) < new Date()) {
-        console.log('Header: Session expired, clearing...')
-        sessionUtils.clearSession()
-        setUser(null)
-        setLoading(false)
-        return
-      }
-    }
-
-    setUser(currentUser)
-    setLoading(false)
-  }, [])
-
-  // Session değişikliklerini dinle
-  useEffect(() => {
-    const handleStorageChange = () => {
-      console.log('Header: Storage changed, rechecking session...')
-      const currentUser = sessionUtils.getCurrentUser()
-      setUser(currentUser)
-    }
-
-    window.addEventListener('storage', handleStorageChange)
-    return () => window.removeEventListener('storage', handleStorageChange)
-  }, [])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -90,6 +51,10 @@ export default function Header() {
       return () => document.removeEventListener('keydown', handleKeyDown)
     }
   }, [isSearchOpen])
+
+  const handleLogout = async () => {
+    await logout()
+  }
 
   return (
     <div className="fixed w-full top-0 z-50">
@@ -169,13 +134,13 @@ export default function Header() {
                         </form>
                       </Transition>
 
-                                              <button
-                          type="button"
-                          onClick={() => setIsSearchOpen(!isSearchOpen)}
-                          className={`text-white hover:text-gray-300 transition-all duration-200 ${
-                            isSearchOpen ? 'rotate-90 text-gray-400' : 'rotate-0'
-                          }`}
-                        >
+                      <button
+                        type="button"
+                        onClick={() => setIsSearchOpen(!isSearchOpen)}
+                        className={`text-white hover:text-gray-300 transition-all duration-200 ${
+                          isSearchOpen ? 'rotate-90 text-gray-400' : 'rotate-0'
+                        }`}
+                      >
                         {isSearchOpen ? (
                           <XMarkIcon className="h-5 w-5" />
                         ) : (
@@ -190,7 +155,7 @@ export default function Header() {
                       <div className="animate-pulse bg-gray-400 rounded-full h-4 w-4"></div>
                       <span className="ml-2">Yükleniyor...</span>
                     </div>
-                  ) : user ? (
+                  ) : isAuthenticated && user ? (
                     <Menu as="div" className="relative">
                       <Menu.Button className="flex items-center space-x-2 border border-gray-600 hover:border-gray-500 rounded-lg px-3 py-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">
                         <div className="flex items-center space-x-2">
@@ -265,12 +230,7 @@ export default function Header() {
                               <Menu.Item>
                                 {({ active }) => (
                                   <button
-                                    onClick={async () => {
-                                      await fetch('/api/auth/logout', { method: 'POST' })
-                                      sessionUtils.clearSession()
-                                      setUser(null)
-                                      window.location.reload()
-                                    }}
+                                    onClick={handleLogout}
                                     className={`${
                                       active ? 'bg-red-50 text-red-700' : 'text-red-600'
                                     } flex items-center w-full text-left px-4 py-3 text-sm hover:bg-red-50 hover:text-red-700 transition-all duration-200 group`}
@@ -365,7 +325,7 @@ export default function Header() {
                     <div className="px-3 py-2 text-base text-gray-400">
                       Yükleniyor...
                     </div>
-                  ) : user ? (
+                  ) : isAuthenticated && user ? (
                     <div className="space-y-2">
                       <div className="flex items-center space-x-3 px-3 py-2 border border-gray-600 rounded-lg mx-2">
                         {user.avatarUrl ? (
@@ -391,12 +351,7 @@ export default function Header() {
                         Hesabım
                       </a>
                       <button
-                        onClick={async () => {
-                          await fetch('/api/auth/logout', { method: 'POST' })
-                          sessionUtils.clearSession()
-                          setUser(null)
-                          window.location.reload()
-                        }}
+                        onClick={handleLogout}
                         className="block w-full text-left px-3 py-2 text-base text-red-400 hover:text-red-300 transition-colors duration-200 focus:outline-none"
                       >
                         Çıkış Yap

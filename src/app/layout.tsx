@@ -1,77 +1,49 @@
-import { Inter } from 'next/font/google'
-import Script from 'next/script'
-import './globals.css'
-import Header from '../components/Header'
-import Footer from '../components/Footer'
-import TokenVerificationProvider from '../components/TokenVerificationProvider'
-import AutoLogoutNotification from '../components/AutoLogoutNotification'
+import type { Metadata } from "next"
+import { Inter } from "next/font/google"
+import "./globals.css"
+import { AuthProvider } from "@/hooks/useAuth"
+import Header from "@/components/Header"
+import Footer from "@/components/Footer"
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const inter = Inter({ subsets: ["latin"] })
 
-// Dinamik URL oluşturma - her zaman production URL'ini kullan
-const getBaseUrl = () => {
-  return 'https://ozet.today'
-}
-
-const baseUrl = getBaseUrl()
-
-export const metadata = {
-  title: {
-    default: 'ÖZET: Günün Özeti',
-    template: '%s - ÖZET: Günün Özeti'
-  },
-  description: 'Türkiye ve dünyadan en güncel haberler, son dakika gelişmeleri, ekonomi, siyaset, spor ve teknoloji haberleri. Güvenilir kaynaklardan derlenen tarafsız habercilik.',
-  keywords: [
-    'haber',
-    'güncel haberler',
-    'son dakika',
-    'Türkiye haberleri',
-    'dünya haberleri',
-    'ekonomi haberleri',
-    'siyaset haberleri',
-    'spor haberleri',
-    'teknoloji haberleri',
-    'gazete',
-    'haber sitesi',
-    'günlük haberler',
-    'haber özeti',
-    'güvenilir haber',
-    'tarafsız habercilik'
-  ],
-  authors: [{ name: 'ÖZET.today' }],
-  creator: 'ÖZET.today',
-  publisher: 'ÖZET.today',
+export const metadata: Metadata = {
+  title: "ÖZET.today - Türkiye'nin Haber Merkezi",
+  description: "Güncel haberleri takip edin, kişiselleştirilmiş haber akışınızı oluşturun ve favori platformlarınızdan haberleri kaçırmayın.",
+  keywords: "haber, güncel haberler, Türkiye haberleri, son dakika, haber takip, RSS, haber platformları",
+  authors: [{ name: "ÖZET.today" }],
+  creator: "ÖZET.today",
+  publisher: "ÖZET.today",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(baseUrl),
+  metadataBase: new URL('https://ozet.today'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    type: 'website',
-    locale: 'tr_TR',
-    url: `${baseUrl}`,
-    title: 'ÖZET',
-    description: 'Türkiye ve dünyadan en güncel haberler, son dakika gelişmeleri, ekonomi, siyaset, spor ve teknoloji haberleri.',
-    siteName: 'ÖZET',
+    title: "ÖZET.today - Türkiye'nin Haber Merkezi",
+    description: "Güncel haberleri takip edin, kişiselleştirilmiş haber akışınızı oluşturun ve favori platformlarınızdan haberleri kaçırmayın.",
+    url: 'https://ozet.today',
+    siteName: 'ÖZET.today',
     images: [
       {
-        url: `${baseUrl}/social-profile.png`,
+        url: '/assets/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'ÖZET.today logo',
+        alt: 'ÖZET.today - Türkiye\'nin Haber Merkezi',
       },
     ],
+    locale: 'tr_TR',
+    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ÖZET',
-    description: 'Türkiye ve dünyadan en güncel haberler, son dakika gelişmeleri.',
-    images: [`${baseUrl}/social-profile.png`],
-    creator: '@ozettoday',
+    title: "ÖZET.today - Türkiye'nin Haber Merkezi",
+    description: "Güncel haberleri takip edin, kişiselleştirilmiş haber akışınızı oluşturun ve favori platformlarınızdan haberleri kaçırmayın.",
+    images: ['/assets/og-image.jpg'],
   },
   robots: {
     index: true,
@@ -86,7 +58,6 @@ export const metadata = {
   },
   verification: {
     google: 'your-google-verification-code',
-    yandex: 'your-yandex-verification-code',
   },
 }
 
@@ -96,55 +67,59 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="tr" className={`${inter.variable} h-full bg-white`}>
+    <html lang="tr">
       <head>
-        <link rel="icon" href="/favicon.png" />
+        <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#ff0102" />
-        <meta name="msapplication-TileColor" content="#ff0102" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
-        <meta name="format-detection" content="telephone=no" />
-        <meta name="geo.region" content="TR" />
-        <meta name="geo.placename" content="Türkiye" />
-        <meta name="geo.position" content="39.9334;32.8597" />
-        <meta name="ICBM" content="39.9334, 32.8597" />
-        <meta name="distribution" content="global" />
-        <meta name="rating" content="general" />
-        <meta name="revisit-after" content="1 days" />
-        <meta name="language" content="Turkish" />
-        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-        <link rel="canonical" href="https://ozet.today" />
-        <link rel="alternate" hrefLang="tr" href="https://ozet.today" />
-        <link rel="alternate" hrefLang="x-default" href="https://ozet.today" />
 
-        {/* Google Analytics */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-2Q6LRYJGFT"
-          strategy="afterInteractive"
+        {/* Preconnect to external domains */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://id.cengel.studio" />
+
+        {/* DNS prefetch for performance */}
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="//id.cengel.studio" />
+
+        {/* Meta tags for better SEO */}
+        <meta name="theme-color" content="#dc2626" />
+        <meta name="msapplication-TileColor" content="#dc2626" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="ÖZET.today" />
+
+        {/* Structured data for rich snippets */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "ÖZET.today",
+              "description": "Türkiye'nin Haber Merkezi",
+              "url": "https://ozet.today",
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://ozet.today/arama?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+              }
+            })
+          }}
         />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-2Q6LRYJGFT');
-          `}
-        </Script>
       </head>
-      <body className="h-full">
-        <TokenVerificationProvider>
-          <div className="min-h-full">
+      <body className={inter.className}>
+        <AuthProvider>
+          <div className="min-h-screen bg-gray-50">
             <Header />
-            <AutoLogoutNotification />
-            <main className="pt-[90px]">
+            <main className="pt-16">
               <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 {children}
               </div>
             </main>
             <Footer />
           </div>
-        </TokenVerificationProvider>
+        </AuthProvider>
       </body>
     </html>
   )
