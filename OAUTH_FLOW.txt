@@ -1,0 +1,40 @@
+// ÖZET için bilgiler
+// Client ID: pSsyy6i3D7rGyK8Hpt68Uw
+// Client Secret: u3huMcdhrkUR9zVcODYIPGGg2fFgGbbb7JIwOI-juw0
+// Redirect URI: https://ozet.today/api/oauth
+
+// 1. Kullanıcıyı authorize endpoint'e yönlendirin
+const authUrl = `https://id.cengel.studio/api/v2/oauth/authorize?` +
+  `client_id=YOUR_CLIENT_ID&` +
+  `redirect_uri=YOUR_REDIRECT_URI&` +
+  `response_type=code&` +
+  `scope=openid profile email&` +
+  `state=random_state_string`;
+
+// 2. Kullanıcı izin verdikten sonra callback'te authorization code alın
+// 3. Authorization code ile token alın
+const tokenResponse = await fetch('https://id.cengel.studio/api/v2/oauth/token', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  body: new URLSearchParams({
+    grant_type: 'authorization_code',
+    client_id: 'YOUR_CLIENT_ID',
+    client_secret: 'YOUR_CLIENT_SECRET',
+    code: authorization_code,
+    redirect_uri: 'YOUR_REDIRECT_URI'
+  })
+});
+
+const tokens = await tokenResponse.json();
+// tokens.access_token ve tokens.id_token alın
+
+// 4. UserInfo endpoint ile kullanıcı bilgilerini alın
+const userInfo = await fetch('https://id.cengel.studio/api/v2/oauth/userinfo', {
+  headers: { 'Authorization': `Bearer ${tokens.access_token}` }
+});
+
+const userData = await userInfo.json();
+console.log(userData); // Kullanıcı bilgileri
+
+// Kullanıcı giriş yapıp uygulamayı bağladığı taktirde User tablosuna ilgili bilgiler kaydedilmeli
+// Ayrıca, Cengel ID tarafında uygulama bağlantısı kesilebilir, kesildiği taktirde session&cookie değerleri sıfırlanır. Bunun kontrolünü 1 dakikada bir çalışan interval ile gerçekleştir, kontrol kodlarının tamamı client tarafında olmalı.

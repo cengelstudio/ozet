@@ -12,14 +12,18 @@ Run your app in the development mode.
 blitz dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:8880](http://localhost:8880) with your browser to see the result.
 
 ## Environment Variables
 
 Ensure the `.env.local` file has required environment variables:
 
 ```
+# Database Configuration
 DATABASE_URL=postgresql://<YOUR_DB_USERNAME>@localhost:5432/ozet.today
+
+# Development Configuration
+NODE_ENV=development
 ```
 
 Ensure the `.env.test.local` file has required environment variables:
@@ -27,6 +31,25 @@ Ensure the `.env.test.local` file has required environment variables:
 ```
 DATABASE_URL=postgresql://<YOUR_DB_USERNAME>@localhost:5432/ozet.today_test
 ```
+
+## OAuth Integration
+
+This project uses **only** OAuth authentication with Cengel Studio identity provider. Traditional login system has been removed. For detailed setup instructions, see [OAuth Setup Documentation](./docs/OAUTH_SETUP.md).
+
+### OAuth Configuration
+
+- **Client ID**: `pSsyy6i3D7rGyK8Hpt68Uw`
+- **Client Secret**: `u3huMcdhrkUR9zVcODYIPGGg2fFgGbbb7JIwOI-juw0`
+- **Redirect URI**: `${NEXT_PUBLIC_BASE_URL}/api/oauth` (dinamik)
+- **Provider**: Cengel Studio Identity Service
+
+### Features
+
+- ✅ Single sign-on with Cengel Studio
+- ✅ Secure OAuth 2.0 flow with state validation
+- ✅ Automatic user creation/update from OAuth data
+- ✅ Session management with cookies and localStorage
+- ✅ Comprehensive error handling in Turkish
 
 ## Tests
 

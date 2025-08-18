@@ -18,11 +18,27 @@ model User {
   updatedAt      DateTime @updatedAt
   name           String?
   email          String   @unique
-  hashedPassword String?
   role           String   @default("USER")
+  birthDate      DateTime?
+  avatarUrl      String?  // Gravatar URL
+  
+  // OAuth bilgileri
+  oauthProvider String?  // cengel_studio, google, github, etc.
+  oauthId       String?  // OAuth provider'dan gelen unique ID
+  username      String?  @unique // Kullanıcı adı (OAuth'dan gelebilir) - unique
+  emailVerified Boolean  @default(false) // Email doğrulandı mı
+  lastOAuthSync DateTime? // Son OAuth senkronizasyon zamanı
 
   tokens   Token[]
   sessions Session[]
+
+  // Sosyal medya özellikleri
+  likes    Like[]
+  saves    Save[]
+  comments Comment[]
+  follows  Follow[] // Kullanıcının takip ettiği platformlar
+  
+  @@index([oauthProvider, oauthId])
 }
 
 model Session {
@@ -55,6 +71,115 @@ model Token {
   userId Int
 
   @@unique([hashedToken, type])
+}
+
+model News {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  title       String
+  description String?
+  content     String?
+  link        String   @unique
+  imageUrl    String?
+  publishedAt DateTime?
+  platformDomain String   // Domain name as platform identifier
+  platform    Platform @relation(fields: [platformDomain], references: [domain])
+  locale      String   @default("TR")
+  category    String?
+  author      String?
+  guid        String?  @unique // RSS item guid for deduplication
+
+  @@index([platformDomain])
+  @@index([publishedAt])
+  @@index([locale])
+
+  // Sosyal medya özellikleri
+  likes    Like[]
+  saves    Save[]
+  comments Comment[]
+}
+
+// Platform profilleri (sosyal medya tarzında)
+model Platform {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  domain      String   @unique // hurriyet.com.tr, cnnturk.com
+  name        String   // Platform adı
+  description String?  // Hakkında yazısı
+  avatarUrl   String?  // Profil fotoğrafı
+  bannerUrl   String?  // Kapak fotoğrafı
+  websiteUrl  String?  // Ana site URL'i
+  isVerified  Boolean  @default(false) // Doğrulanmış hesap
+  locale      String   @default("TR") // Platform locale (TR, INT)
+  news        News[]   // Platform'a ait haberler
+  followers   Follow[] // Platform'u takip eden kullanıcılar
+
+  @@index([domain])
+}
+
+// Beğeni sistemi
+model Like {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  userId    Int
+  newsId    Int
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  news News @relation(fields: [newsId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, newsId])
+  @@index([userId])
+  @@index([newsId])
+}
+
+// Kaydetme sistemi
+model Save {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  userId    Int
+  newsId    Int
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  news News @relation(fields: [newsId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, newsId])
+  @@index([userId])
+  @@index([newsId])
+}
+
+// Yorum sistemi
+model Comment {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  content   String
+  userId    Int
+  newsId    Int
+  parentId  Int?     // Yanıtlanan yorum ID'si (nested comments için)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  news News @relation(fields: [newsId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([newsId])
+  @@index([parentId])
+}
+
+// Platform takip sistemi
+model Follow {
+  id           Int      @id @default(autoincrement())
+  createdAt    DateTime @default(now())
+  userId       Int
+  platformId   Int
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platform Platform @relation(fields: [platformId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, platformId])
+  @@index([userId])
+  @@index([platformId])
 }
 
 // NOTE: It's highly recommended to use an enum for the token type
