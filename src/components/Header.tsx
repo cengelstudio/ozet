@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth'
 const navigation = [
   { name: 'Ana Sayfa', href: '/' as const },
   { name: 'Son Dakika', href: '/son-dakika' as const },
+  { name: 'Harita', href: '/harita' as const },
   { name: '#Deprem', href: '/deprem-haberleri' as const },
   { name: '#Yangın', href: '/yangin-haberleri' as const },
   { name: 'Platformlar', href: '/platformlar' as const },

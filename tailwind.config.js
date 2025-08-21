@@ -55,6 +55,7 @@ module.exports = {
   plugins: [
     require('@tailwindcss/typography'),
     require('@tailwindcss/forms'),
+    require('@tailwindcss/line-clamp'),
     function({ addUtilities }) {
       const newUtilities = {
         '.animation-delay-150': {

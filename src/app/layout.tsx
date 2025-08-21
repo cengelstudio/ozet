@@ -1,19 +1,22 @@
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import "./globals.css"
-import { AuthProvider } from "@/hooks/useAuth"
-import Header from "@/components/Header"
-import Footer from "@/components/Footer"
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
+import AuthProvider from '@/hooks/useAuth'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: "ÖZET.today - Türkiye'nin Haber Merkezi",
-  description: "Güncel haberleri takip edin, kişiselleştirilmiş haber akışınızı oluşturun ve favori platformlarınızdan haberleri kaçırmayın.",
-  keywords: "haber, güncel haberler, Türkiye haberleri, son dakika, haber takip, RSS, haber platformları",
-  authors: [{ name: "ÖZET.today" }],
-  creator: "ÖZET.today",
-  publisher: "ÖZET.today",
+  title: {
+    template: '%s - ÖZET.today',
+    default: 'Ana Sayfa - ÖZET.today',
+  },
+  description: 'Türkiye\'nin haber merkezi. Güncel haberleri takip edin, kişiselleştirilmiş haber akışınızı oluşturun.',
+  keywords: ['haber', 'güncel', 'son dakika', 'Türkiye', 'medya', 'haber takip', 'RSS'],
+  authors: [{ name: 'ÖZET.today' }],
+  creator: 'ÖZET.today',
+  publisher: 'ÖZET.today',
   formatDetection: {
     email: false,
     address: false,
@@ -24,10 +27,12 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: "ÖZET.today - Türkiye'nin Haber Merkezi",
-    description: "Güncel haberleri takip edin, kişiselleştirilmiş haber akışınızı oluşturun ve favori platformlarınızdan haberleri kaçırmayın.",
+    title: 'ÖZET.today - Türkiye\'nin Haber Merkezi',
+    description: 'Türkiye\'nin haber merkezi. Güncel haberleri takip edin, kişiselleştirilmiş haber akışınızı oluşturun.',
     url: 'https://ozet.today',
     siteName: 'ÖZET.today',
+    locale: 'tr_TR',
+    type: 'website',
     images: [
       {
         url: '/assets/og-image.jpg',
@@ -36,13 +41,11 @@ export const metadata: Metadata = {
         alt: 'ÖZET.today - Türkiye\'nin Haber Merkezi',
       },
     ],
-    locale: 'tr_TR',
-    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: "ÖZET.today - Türkiye'nin Haber Merkezi",
-    description: "Güncel haberleri takip edin, kişiselleştirilmiş haber akışınızı oluşturun ve favori platformlarınızdan haberleri kaçırmayın.",
+    title: 'ÖZET.today - Türkiye\'nin Haber Merkezi',
+    description: 'Türkiye\'nin haber merkezi. Güncel haberleri takip edin, kişiselleştirilmiş haber akışınızı oluşturun.',
     images: ['/assets/og-image.jpg'],
   },
   robots: {

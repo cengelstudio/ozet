@@ -5,7 +5,8 @@ type NewsListProps = {
   platformDomain?: string
   isBreakingNews?: boolean
   searchQuery?: string
-  layout?: 'masonry' | 'grid'
+  layout?: 'masonry' | 'list'
+  columns?: number // Yeni prop: sütun sayısı
 }
 
 // Server-side initial data fetching
@@ -61,8 +62,8 @@ async function getInitialNews(platformDomain?: string, isBreakingNews?: boolean,
 }
 
 // Async component for server-side data fetching
-async function NewsListServer({ platformDomain, isBreakingNews, searchQuery, layout = 'masonry' }: NewsListProps = {}) {
-  console.log('NewsList component called with:', { platformDomain, isBreakingNews, searchQuery, layout })
+async function NewsListServer({ platformDomain, isBreakingNews, searchQuery, layout = 'masonry', columns = 2 }: NewsListProps = {}) {
+  console.log('NewsList component called with:', { platformDomain, isBreakingNews, searchQuery, layout, columns })
 
   const initialData = await getInitialNews(platformDomain, isBreakingNews, searchQuery)
 
@@ -79,6 +80,7 @@ async function NewsListServer({ platformDomain, isBreakingNews, searchQuery, lay
       isBreakingNews={isBreakingNews}
       searchQuery={searchQuery}
       layout={layout}
+      columns={columns}
     />
   )
 }
@@ -86,20 +88,47 @@ async function NewsListServer({ platformDomain, isBreakingNews, searchQuery, lay
 // Main component that wraps the async component in Suspense
 export default function NewsList(props: NewsListProps) {
   return (
-    <Suspense fallback={<NewsListSkeleton />}>
+    <Suspense fallback={<NewsListSkeleton columns={props.columns} />}>
       <NewsListServer {...props} />
     </Suspense>
   )
 }
 
-function NewsListSkeleton() {
+function NewsListSkeleton({ columns = 2 }: { columns?: number }) {
+  // Responsive grid sınıfları
+  const getGridClasses = (cols: number) => {
+    const baseClass = 'grid gap-6'
+    const responsiveClasses = []
+
+    // Desktop için belirtilen sütun sayısı
+    if (cols >= 3) {
+      responsiveClasses.push('lg:grid-cols-3')
+    } else if (cols === 2) {
+      responsiveClasses.push('lg:grid-cols-2')
+    } else {
+      responsiveClasses.push('lg:grid-cols-1')
+    }
+
+    // Tablet için 2 sütun (eğer desktop'ta 3'ten fazla ise)
+    if (cols >= 3) {
+      responsiveClasses.push('md:grid-cols-2')
+    } else {
+      responsiveClasses.push('md:grid-cols-1')
+    }
+
+    // Mobil için 1 sütun
+    responsiveClasses.push('grid-cols-1')
+
+    return `${baseClass} ${responsiveClasses.join(' ')}`
+  }
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className={getGridClasses(columns)}>
       {[...Array(6)].map((_, i) => (
         <div key={i} className="bg-white rounded-2xl shadow-sm p-6 animate-pulse">
           <div className="h-4 bg-gray-200 rounded mb-4"></div>
-          <div className="h-3 bg-gray-200 rounded mb-2"></div>
-          <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-200 rounded mb-2 w-3/4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
         </div>
       ))}
     </div>

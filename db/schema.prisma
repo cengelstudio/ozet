@@ -133,6 +133,30 @@ model Platform {
   @@index([domain])
 }
 
+// Topics tablosu - Haberlerde geçen konular
+model Topic {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  title       String   @unique // Konu başlığı (Beşiktaş, Metehan Alp Saral, etc.)
+  image       String?  // Konu ile ilgili görsel URL'i
+  language    String   @default("tr") // Dil (tr, en, etc.)
+  isApproved  Boolean  @default(false) // Onaylanmış mı
+  description String?  // Konu açıklaması
+  slug        String?  @unique // URL-friendly slug
+  category    String?  // Kategori (spor, siyaset, ekonomi, etc.)
+  tags        String?  // Etiketler (JSON string)
+  viewCount   Int      @default(0) // Görüntülenme sayısı
+  newsCount   Int      @default(0) // Bu konuyla ilgili haber sayısı
+  lastSeenAt  DateTime? // Son görüldüğü tarih
+
+  @@index([title])
+  @@index([language])
+  @@index([isApproved])
+  @@index([category])
+  @@index([lastSeenAt])
+}
+
 // Beğeni sistemi
 model Like {
   id        Int      @id @default(autoincrement())

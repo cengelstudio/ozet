@@ -8,6 +8,11 @@ import { HeartIcon, BookmarkIcon, ChatBubbleLeftIcon, ArrowTopRightOnSquareIcon 
 import { HeartIcon as HeartIconSolid, BookmarkIcon as BookmarkIconSolid } from '@heroicons/react/24/solid'
 import { CheckBadgeIcon } from '@heroicons/react/24/solid'
 import AuthModal from './AuthModal'
+import moment from 'moment'
+import 'moment/locale/tr'
+
+// Moment.js'i Türkçe olarak ayarla
+moment.locale('tr')
 
 // SEO dostu slug oluşturma fonksiyonu
 function createSlug(id: number, title: string): string {
@@ -122,15 +127,7 @@ export default function NewsCard({
               {useMemo(() => {
                 if (publishedAtFormatted) return publishedAtFormatted
                 try {
-                  return new Intl.DateTimeFormat('tr-TR', {
-                    timeZone: 'Europe/Istanbul',
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
-                  }).format(new Date(publishedAt))
+                  return moment(publishedAt).fromNow()
                 } catch {
                   return ''
                 }

@@ -3,6 +3,12 @@
 import { useState, useEffect } from 'react'
 import Masonry from 'react-masonry-css'
 import NewsCard from './NewsCard'
+import { Bars3Icon, Squares2X2Icon, SquaresPlusIcon } from '@heroicons/react/24/outline'
+import moment from 'moment'
+import 'moment/locale/tr'
+
+// Moment.js'i Türkçe olarak ayarla
+moment.locale('tr')
 
 type News = {
   id: number
@@ -26,12 +32,6 @@ type News = {
   }
 }
 
-const breakpointColumns = {
-  default: 2,
-  1024: 2,
-  768: 1
-}
-
 type NewsListClientProps = {
   initialData: {
     news: News[]
@@ -40,7 +40,8 @@ type NewsListClientProps = {
   platformDomain?: string
   isBreakingNews?: boolean
   searchQuery?: string
-  layout?: 'masonry' | 'grid'
+  layout?: 'masonry' | 'list'
+  columns?: number
 }
 
 export default function NewsListClient({
@@ -48,15 +49,27 @@ export default function NewsListClient({
   platformDomain,
   isBreakingNews,
   searchQuery,
-  layout = 'masonry'
+  layout = 'masonry',
+  columns = 2
 }: NewsListClientProps) {
   const [news, setNews] = useState<News[]>(initialData.news || [])
   const [page, setPage] = useState(2) // İlk sayfa zaten yüklendi
   const [hasMore, setHasMore] = useState(initialData.pagination?.hasNext || false)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [viewMode, setViewMode] = useState<'masonry' | 'list'>(layout)
   const [seenNewsIds, setSeenNewsIds] = useState<Set<number>>(
     new Set(initialData.news?.map(n => n.id) || [])
   )
+
+  // Responsive breakpoint columns hesaplama
+  const getBreakpointColumns = (cols: number) => {
+    const breakpoints = {
+      default: cols,
+      1024: cols >= 3 ? 2 : cols, // lg breakpoint
+      768: cols >= 2 ? 1 : 1      // md breakpoint
+    }
+    return breakpoints
+  }
 
   // Sonsuz kaydırma için scroll event listener
   useEffect(() => {
@@ -78,7 +91,7 @@ export default function NewsListClient({
           fetchMoreNews(nextPage)
           return nextPage
         })
-        
+
         // 1 saniye throttle
         setTimeout(() => {
           isThrottled = false
@@ -164,12 +177,86 @@ export default function NewsListClient({
     )
   }
 
-  if (layout === 'grid') {
+  // Görünüm seçici
+  const ViewSelector = () => (
+    <div className="flex items-center justify-end mb-6">
+      <div className="flex items-center bg-white rounded-lg border border-gray-200 p-1">
+        <button
+          onClick={() => setViewMode('masonry')}
+          className={`p-2 rounded-md transition-colors duration-200 ${
+            viewMode === 'masonry'
+              ? 'bg-red-100 text-red-600'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+          title="Masonry görünümü"
+        >
+          <Squares2X2Icon className="h-5 w-5" />
+        </button>
+        <button
+          onClick={() => setViewMode('list')}
+          className={`p-2 rounded-md transition-colors duration-200 ${
+            viewMode === 'list'
+              ? 'bg-red-100 text-red-600'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+          title="Liste görünümü"
+        >
+          <Bars3Icon className="h-5 w-5" />
+        </button>
+      </div>
+    </div>
+  )
+
+  // List layout
+  if (viewMode === 'list') {
     return (
       <>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <ViewSelector />
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
           {news.map((item, index) => (
-            <NewsCard key={`${item.id}-${index}`} {...item} />
+            <div key={`${item.id}-${index}`}>
+              <div className="p-4 hover:bg-gray-50 transition-colors duration-200">
+                <div className="flex items-start space-x-4">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                      <a href={item.link} target="_blank" rel="noopener noreferrer" className="hover:text-red-600 transition-colors duration-200">
+                        {item.title}
+                      </a>
+                    </h3>
+                    {item.description && (
+                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                        {item.description}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        {item.platform.avatarUrl && (
+                          <img
+                            src={item.platform.avatarUrl}
+                            alt={item.platform.name}
+                            className="w-6 h-6 rounded-lg object-cover"
+                          />
+                        )}
+                        <span className="text-sm font-medium text-gray-700">{item.platform.name}</span>
+                      </div>
+                      <span className="text-xs text-gray-500">{moment(item.publishedAt).fromNow()}</span>
+                    </div>
+                  </div>
+                  {item.imageUrl && (
+                    <div className="flex-shrink-0">
+                      <img
+                        src={item.imageUrl}
+                        alt={item.title}
+                        className="w-32 h-24 object-cover rounded-lg"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+              {index < news.length - 1 && (
+                <hr className="border-gray-100" />
+              )}
+            </div>
           ))}
         </div>
 
@@ -195,8 +282,9 @@ export default function NewsListClient({
 
   return (
     <>
+      <ViewSelector />
       <Masonry
-        breakpointCols={breakpointColumns}
+        breakpointCols={getBreakpointColumns(columns)}
         className="flex -ml-6 w-auto"
         columnClassName="pl-6 bg-transparent"
       >
